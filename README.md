@@ -82,7 +82,7 @@ export async function getProfile(userId) {
 ### 에러 처리 방법
 `action()`에서 예외상황이 발생되면 에러를 던집니다.
 
-try catch문을 사용해 상태코드를 통한 에러처리를 할 수 잇습니다.
+try catch문을 사용해 상태코드를 통한 에러처리를 할 수 있습니다.
 
 ```typescript
 'use client';
@@ -102,9 +102,9 @@ export default function Page() {
       }else if(error.status == 403){
         alert('접근할 수 없습니다.');
       }else if(error.status == 404){
-        alert(error.message);
+        alert(error.message); // "해당 유저가 없습니다."
       }else{
-        console.error(error.status, error.message)
+        console.error(error.status, error.message);
       }
     }
   }
