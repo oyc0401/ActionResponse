@@ -115,9 +115,15 @@ export async function action<Body>(serverActionPromise: Promise<ActionResponseTy
       return res;
     } catch (error) {
       // 네트워크, 서버 문제 등으로 오류가 났을 때
+      if (error instanceof Error) {
+        throw {
+          status: 500,
+          message: error.message,
+        }
+      }
       throw {
         status: 500,
-        message: error.message,
+        message: `${error}`,
       }
     }
   }
