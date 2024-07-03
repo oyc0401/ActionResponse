@@ -1,6 +1,6 @@
 /**
  * ActionResponse Library
- *
+ * 
  * `ActionResponse`는 서버 액션을 보다 쉽게 처리할 수 있도록 돕는 방법을 제공합니다.
  * 각 HTTP 상태 코드에 대응하는 메서드를 통해 일관된 방식으로 서버액션을 생성할 수 있습니다.
  *
@@ -8,7 +8,7 @@
  * ```typescript
  * 'use server'
  * import { ActionResponse } from '@/ActionResponse';
- *
+ * 
  * async function getProfile() {
  *   return ActionResponse.ok({ name: 'Foo', birth: '20050703' });
  * }
@@ -82,7 +82,7 @@ export class ActionResponse {
 
 /**
  * Wrapper of server action
- *
+ * 
  * 성공 시 결과값 제공, 오류 발생시 오류 던짐
  * @param serverActionPromise - API 응답을 반환하는 프로미스 함수
  * @example
@@ -99,35 +99,41 @@ export class ActionResponse {
  *   } else {
  *     console.error(error.message);
  *   }
- * }
+ * }  
  * ```
  * @ErrorType
  * ```typescript
  * interface Error { status: number; message: any; }
  * ```
- *
+ * 
  */
-export async function action<Body>(
-  serverActionPromise: Promise<ActionResponseType<Body>>,
-) {
-  try {
-    const response = await serverActionPromise;
-    if (response.message != null || response.message != undefined) {
-      return response.message;
-    } else {
+export async function action<Body>(serverActionPromise: Promise<ActionResponseType<Body>>) {
+
+  async function getResponse() {
+    try {
+      const res = await serverActionPromise;
+      return res;
+    } catch (error) {
+      // 네트워크, 서버 문제 등으로 오류가 났을 때
       throw {
-        status: response.status,
-        message: response.error,
-      };
+        status: 500,
+        message: error.message,
+      }
     }
-  } catch (error) {
-    // 네트워크, 서버 문제 등으로 오류가 났을 때
-    throw {
-      status: 500,
-      message: error.message,
-    };
   }
+
+  const response = await getResponse();
+  if (response.message != null || response.message != undefined) {
+    return response.message;
+  } else {
+    throw {
+      status: response.status,
+      message: response.error,
+    }
+  }
+
 }
+
 
 interface ActionResponseOk<Body> {
   message: Body;
@@ -141,11 +147,6 @@ interface ActionResponseError {
   error: any;
 }
 
-export type ActionResponseType<Body> =
-  | ActionResponseOk<Body>
-  | ActionResponseError;
+export type ActionResponseType<Body> = ActionResponseOk<Body> | ActionResponseError;
 
-interface ActionError {
-  status: number;
-  message: any;
-}
+interface ActionError { status: number; message: any; }
